@@ -17,4 +17,5 @@ with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
             btn = gr.Button("Сделай красиво")
             btn.click(fn=numpyMagic, inputs=input_img, outputs=output_img)
             
+            
 demo.launch(inbrowser=True, server_port=7860)
