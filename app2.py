@@ -14,12 +14,44 @@ def FromSource(imgSourse, redVal, greenVal, blueVal):
     return dest
 
 def DefaultColors(inputImg):
-    redArray = FromSource(inputImg,0.2,0,0)
+    redArray = FromSource(inputImg,1,0,0)
     greenArray = FromSource(inputImg,0,1,0)
     blueArray = FromSource(inputImg,0,0,1)
     return (redArray, greenArray, blueArray)
 
-def numpyMagic(rawImg):
+def ChanelRedFromOriginalImage(inputImg):
+    redArray = FromSource(inputImg,1,0,0)
+    return redArray
+
+
+
+def numpyMagic():
+    global redArray
+    global greenArray
+    global blueArray
+    global width
+    global height
+    global inputImg
+    newImg = np.zeros((height, width, 3),dtype=np.uint8)
+
+    #Функциоанал
+    redArray = ChanelRedFromOriginalImage(inputImg) * 0.5
+    
+    InRed(newImg,redArray)
+    InGreen(newImg,greenArray)
+    InBlue(newImg, blueArray)
+
+    rawImgOutput =  Image.fromarray(newImg)
+    return rawImgOutput
+
+def ImgLoad(rawImg):
+    global redArray
+    global greenArray
+    global blueArray
+    global width
+    global height
+    global inputImg
+
     rawImg = rawImg.convert(mode='RGB')
     inputImg = np.asarray(rawImg,dtype=np.uint16) #, dtype=np.int16)
 
@@ -45,7 +77,8 @@ with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
                 input_img = gr.Image(type="pil",width=500)
                 output_img = gr.Image(type="pil",width=500)
             btn = gr.Button("Сделай красиво")
-            btn.click(fn=numpyMagic, inputs=input_img, outputs=output_img)
+            btn.click(fn=numpyMagic, outputs=output_img)
+            input_img.upload(fn=ImgLoad,inputs=input_img, outputs=output_img)
 
             
 demo.launch(inbrowser=True, server_port=7860)
