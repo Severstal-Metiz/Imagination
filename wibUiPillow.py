@@ -14,8 +14,6 @@ def MaskGen(ChanelImg, formula):
     npMask = np.asarray(ChanelImg)
     npMask = np.asarray([sinMaskTop(row) for row in npMask])
     imgMask = Image.fromarray(npMask).convert('L')
-    #imgMaskInvers = imgMask.point(lambda x: 255-x)
-    #imgBlank = ChanelImg.point(lambda _: 0)
     imgMackRot = imgMask.rotate(90,expand=True)
     imgMackRot = imgMackRot.resize((imgMask.size))
     imgMask = ImageMath.eval(formula,a=imgMask,b=imgMackRot).convert(mode='L') # '(a+b)/2'
