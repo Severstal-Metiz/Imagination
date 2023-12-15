@@ -8,6 +8,11 @@ def InGreen(dest,sours1, sours2=0,sours3=0):
     dest[:,:,1]  = sours1 + sours2 + sours3
 def InBlue(dest,sours1, sours2=0,sours3=0):
     dest[:,:,2] = sours1 + sours2 + sours3
+def FromSource(imgSourse, redVal, greenVal, blueVal):
+    dest = imgSourse[:,:,0]*redVal + imgSourse[:,:,1]*greenVal + imgSourse[:,:,2]*blueVal
+    return dest
+
+    
 
 
 rawImg = Image.open('E:/РОМАН/!хрень/1_wm.png')
@@ -19,13 +24,14 @@ width=rawImg.width
 height=rawImg.height
 newImg = np.zeros((height, width, 3),dtype=np.uint8)
 
-redArray = inputImg[:,:,0]
-greenArray = inputImg[:,:,1] 
-blueArray = inputImg[:,:,2]
+redArray = FromSource(inputImg,1,0,0)
+greenArray = FromSource(inputImg,0,1,0)
+blueArray = FromSource(inputImg,0,0,1)
+
 
 #эфекты на пиксели
 def fr(y):
-    y = y/2 + random.randint(0,128)
+    y = y #y/2 + random.randint(0,128)
     if y>255: return 255
     else: return y
 def fg(y):
