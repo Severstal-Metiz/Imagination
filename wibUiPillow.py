@@ -1,5 +1,5 @@
 import gradio as gr
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageChops
 import numpy as np
 import random
 #эфекты на пиксели
@@ -37,6 +37,14 @@ def ChanelRedFromOriginalImage(inputImg):
     return redArray
 
 
+
+def Glich(InputImage,shift):
+    shift = int(shift*10)
+    InputImage = InputImage.convert(mode='RGB')
+    Red, Green, Blue = InputImage.split()
+    Red = ImageChops.offset(Red,shift,0)
+    ImgOutput = Image.merge('RGB',(Red, Green,Blue))
+    return ImgOutput
 
 def numpyMagic(gain):
     global redArray
@@ -96,7 +104,7 @@ with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
                 input_img = gr.Image(type="pil",width=500)
                 output_img = gr.Image(type="pil",width=500)
             btn = gr.Button("Сделай красиво")
-            btn.click(fn=numpyMagic, outputs=output_img)
+            btn.click(fn=Glich, inputs=[input_img,redGain], outputs=output_img)
             redGain.change(fn=numpyMagic,inputs=redGain, outputs=output_img)
             input_img.upload(fn=ImgLoad,inputs=input_img, outputs=output_img)
 
