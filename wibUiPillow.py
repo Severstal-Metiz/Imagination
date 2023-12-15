@@ -1,112 +1,70 @@
 import gradio as gr
-from PIL import Image, ImageFilter, ImageChops
+from PIL import Image, ImageFilter, ImageChops, ImageMath
 import numpy as np
-import random
-#эфекты на пиксели
-def fr(y):
-    y = y #y/2 + random.randint(0,128)
-    if y>255: return 255
-    else: return y
-def fg(y):
-    y = y
-    if y>255: return 255
-    else: return y
-def fb(y):
-    y = y
-    if y>255: return 255
-    else: return y
+import math as m
+def sinMaskTop(row):
+    value = 255
+    newRow = np.zeros((row.size))
+    for i in range(1,row.size):
+        newRow[i] = value * m.sin(i/row.size*m.pi)
+    return newRow
 
-def InRed(dest,sours1, sours2=0,sours3=0):
-    dest[:,:,0] = sours1 + sours2 + sours3
-def InGreen(dest,sours1, sours2=0,sours3=0):
-    dest[:,:,1]  = sours1 + sours2 + sours3
-def InBlue(dest,sours1, sours2=0,sours3=0):
-    dest[:,:,2] = sours1 + sours2 + sours3
-def FromSource(imgSourse, redVal, greenVal, blueVal):
-    dest = imgSourse[:,:,0]*redVal + imgSourse[:,:,1]*greenVal + imgSourse[:,:,2]*blueVal
-    return dest
+def MaskGen(ChanelImg, formula):
+    ChanelImg = ChanelImg.convert(mode='L')
+    npMask = np.asarray(ChanelImg)
+    npMask = np.asarray([sinMaskTop(row) for row in npMask])
+    imgMask = Image.fromarray(npMask).convert('L')
+    #imgMaskInvers = imgMask.point(lambda x: 255-x)
+    #imgBlank = ChanelImg.point(lambda _: 0)
+    imgMackRot = imgMask.rotate(90,expand=True)
+    imgMackRot = imgMackRot.resize((imgMask.size))
+    imgMask = ImageMath.eval(formula,a=imgMask,b=imgMackRot).convert(mode='L') # '(a+b)/2'
+    return imgMask
 
-def DefaultColors(inputImg):
-    redArray = FromSource(inputImg,1,0,0)
-    greenArray = FromSource(inputImg,0,1,0)
-    blueArray = FromSource(inputImg,0,0,1)
-    return (redArray, greenArray, blueArray)
-
-def ChanelRedFromOriginalImage(inputImg):
-    redArray = FromSource(inputImg,1,0,0)
-    return redArray
-
-
-
-def Glich(InputImage,shift):
-    shift = int(shift*10)
-    InputImage = InputImage.convert(mode='RGB')
+def Glich(InputImage,shift,blureRadius):
+    global maskImg
+    BlureImage = InputImage.filter(ImageFilter.GaussianBlur(int(blureRadius)))
+    InputImage = Image.composite(InputImage,BlureImage,maskImg)
+    
     Red, Green, Blue = InputImage.split()
-    Red = ImageChops.offset(Red,shift,0)
+
+    RedOffset = ImageChops.offset(Red,int(shift),0)
+
+    Red = Image.composite(Red,RedOffset,maskImg)
+
     ImgOutput = Image.merge('RGB',(Red, Green,Blue))
+    #ImgOutput = maskImg
+
     return ImgOutput
 
-def numpyMagic(gain):
-    global redArray
-    global greenArray
-    global blueArray
-    global width
-    global height
-    global inputImg
-    newImg = np.zeros((height, width, 3),dtype=np.uint8)
+def ImgLoad(InputImage,shift,blureRadius):
+    global maskImg
+    InputImage = InputImage.convert(mode='RGB')
+    maskImg = MaskGen(InputImage,'(a+b)/2')
+    BlureImage = InputImage.filter(ImageFilter.GaussianBlur(int(blureRadius)))
+    InputImage = Image.composite(InputImage,BlureImage,maskImg)
 
-    #Функциоанал
-    redArray = ChanelRedFromOriginalImage(inputImg)* gain
+    Red, Green, Blue = InputImage.split()
 
-    #Comprehension
-    #redArray = np.array([[fr(xi) for xi in row] for row in redArray])
-    #greenArray = np.array([[fg(xi) for xi in row] for row in greenArray])
-    #blueArray = np.array([[fb(xi) for xi in row] for row in blueArray])
-    
-    InRed(newImg,redArray)
-    InGreen(newImg,greenArray)
-    InBlue(newImg, blueArray)
+    RedOffset = ImageChops.offset(Red,int(shift),0)
 
-    rawImgOutput =  Image.fromarray(newImg)
-    return rawImgOutput
+    Red = Image.composite(Red,RedOffset,maskImg)
 
-def ImgLoad(rawImg):
-    global redArray
-    global greenArray
-    global blueArray
-    global width
-    global height
-    global inputImg
-
-    rawImg = rawImg.convert(mode='RGB')
-    inputImg = np.asarray(rawImg,dtype=np.uint16) #, dtype=np.int16)
-
-    width=rawImg.width
-    height=rawImg.height
-    newImg = np.zeros((height, width, 3),dtype=np.uint8)
-
-    #Функциоанал
-    redArray,greenArray,blueArray=  DefaultColors(inputImg)
-
-    InRed(newImg,redArray)
-    InGreen(newImg,greenArray)
-    InBlue(newImg, blueArray)
-
-
-    rawImgOutput =  Image.fromarray(newImg)
-    return rawImgOutput
+    ImgOutput = Image.merge('RGB',(Red, Green,Blue))
+    #ImgOutput = maskImg
+    return ImgOutput
 
 
 with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
     with gr.Column(scale=10):
-            redGain = gr.Slider(0, 3, step=0.1, value=1)
+            shift = gr.Slider(0, 10, step=1, value=5,label='Shift')
+            blureRadius = gr.Slider(0, 20, step=1, value=5, label='Blure')
             with gr.Row():
                 input_img = gr.Image(type="pil",width=500)
                 output_img = gr.Image(type="pil",width=500)
             btn = gr.Button("Сделай красиво")
-            btn.click(fn=Glich, inputs=[input_img,redGain], outputs=output_img)
-            redGain.change(fn=numpyMagic,inputs=redGain, outputs=output_img)
-            input_img.upload(fn=ImgLoad,inputs=input_img, outputs=output_img)
+            btn.click(fn=Glich, inputs=[input_img,shift,blureRadius], outputs=output_img)
+            input_img.upload(fn=ImgLoad,inputs=[input_img,shift,blureRadius], outputs=output_img)
 
             
 demo.launch(inbrowser=True, server_port=7860)
