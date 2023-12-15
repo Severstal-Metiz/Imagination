@@ -43,7 +43,6 @@ def fb(y):
     if y>255: return 255
     else: return y
 
-
 #Comprehension
 redArray = np.array([[fr(xi) for xi in row] for row in redArray])
 greenArray = np.array([[fg(xi) for xi in row] for row in greenArray])
