@@ -21,6 +21,7 @@ def MaskGen(ChanelImg, formula):
 
 def Glich(InputImage,shift,blureRadius,chBox):
     global maskImg
+    InputImage = InputImage.convert(mode='RGB')
     BlureImage = InputImage.filter(ImageFilter.GaussianBlur(int(blureRadius)))
     InputImage = Image.composite(InputImage,BlureImage,maskImg)
     
@@ -37,13 +38,16 @@ def Glich(InputImage,shift,blureRadius,chBox):
     #ImgOutput = maskImg
 
     return ImgOutput
+def Kern(InputImage):
+    kernel = (-1,0,1,
+          -1,0,1,
+          -1,0,1,)
+    ImgOutput = InputImage.filter(ImageFilter.Kernel((3,3),kernel,1,0))
+    return ImgOutput
 
 def ImgLoad(InputImage,shift,blureRadius,chBox):
     global maskImg
-    InputImage = InputImage.convert(mode='RGB')
     maskImg = MaskGen(InputImage,'(a+b)/2')
-    ImgOutput = Glich(InputImage,shift,blureRadius,chBox)
-    return ImgOutput
 
 
 with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
@@ -57,8 +61,10 @@ with gr.Blocks(title="УРА ТОВАРИЩИ!") as demo:
                 input_img = gr.Image(type="pil",width=500)
                 output_img = gr.Image(type="pil",width=500)
             btn = gr.Button("Сделай красиво")
+            btnk = gr.Button("Сделай красиво KERN")
             btn.click(fn=Glich, inputs=[input_img,shift,blureRadius,chBox], outputs=output_img)
-            input_img.upload(fn=ImgLoad,inputs=[input_img,shift,blureRadius,chBox], outputs=output_img)
+            btnk.click(fn=Kern, inputs=[input_img], outputs=output_img)
+            input_img.upload(fn=ImgLoad,inputs=[input_img])
 
             
 demo.launch(inbrowser=True, server_port=7860)
