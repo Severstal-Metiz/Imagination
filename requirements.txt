@@ -1,0 +1,3 @@
+gradio==4.7.1
+Pillow==10.1.0
+pixelsort==1.0.1
