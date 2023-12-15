@@ -45,7 +45,7 @@ def Kern(InputImage):
     ImgOutput = InputImage.filter(ImageFilter.Kernel((3,3),kernel,1,0))
     return ImgOutput
 
-def ImgLoad(InputImage,shift,blureRadius,chBox):
+def ImgLoad(InputImage):
     global maskImg
     maskImg = MaskGen(InputImage,'(a+b)/2')
 
