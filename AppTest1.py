@@ -1,16 +1,13 @@
 import gradio as gr
 from pixelsort import pixelsort
 from PIL import Image
-#from multiprocessing import Process
-#from subprocess import Popen, PIPE
-import ffmpeg
-import os
-temppath = 'temp/'
+from multiprocessing import Process
 
 
-def pixsort(input_img,mask_image,sorting_function,interval_function, randomness,angle,clength,interval_image):
-    output_img = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength,interval_image=interval_image)
+def pixsort(input_img,mask_image, sorting_function,interval_function, randomness,angle,clength,interval_image):
+    output_img = pixelsort(input_img, mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength,interval_image=interval_image)
     return output_img
+
 
 
 def interval_functionddChange(interval_function):
@@ -29,33 +26,36 @@ def interval_functionddChange(interval_function):
     print(interval_image)
     return gr.Slider(visible=visclength,interactive=True), gr.Slider(visible=visLower,interactive=True), gr.Slider(visible=visUpper,interactive=True),gr.Image(visible=visInterval_image,interactive=True)
 
+def pixsrtForGif(input_img, mask_image, sorting_function,interval_function, randomness,angle,clength,interval_image, i):
+    print(i)
+    new_frame = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
+    global frames
+    frames[i] = new_frame
+    
 
-
-def gifIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameDuration,randomness):
-    listDir = os.listdir(temppath)
-    for f in listDir:
-        os.remove(temppath + f)
-    frames = [0]*ammountOfFrames
-    #angle = 0
+def gifIt(input_img, mask_image, sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameDuration):
+    global frames
+    frames = [0]*ammountOfFrames 
+    randomness = 100
+    angle = 0
     ammountOfFrames = ammountOfFrames
     frameDuration = frameDuration
-    for i in range(ammountOfFrames):
-        new_frame = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
-        frames[i] = new_frame
-        #randomness -= 10
-        #angle +=30
-        
-        new_frame.save(temppath + 'image'+ str(i).rjust(3,'0') + '.PNG')
+    i = 0
+
+    if __name__ == '__main__':
+        for i in range(ammountOfFrames):
+        #new_frame = pixelsort(input_img, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
+        #frames[i] = new_frame
+            p = Process(target=pixsrtForGif, args=(input_img, mask_image, sorting_function,interval_function, randomness,angle,clength,interval_image, i))
+            p.start()
+            randomness -= 10
+            angle +=30
+        p.join()
     
     # Save into a GIF file that loops forever
-    (
-        ffmpeg
-        .input("temp/image%03d.PNG", framerate=12)
-        .output("movie.mp4")
-        .run(overwrite_output=True)
-    )
-    #frames[0].save('pixsort.gif', format='GIF', append_images=frames[1:], save_all=True, duration=frameDuration, loop=0)
-    return new_frame #'pixsort.gif'
+        
+    frames[0].save('pixsort.gif', format='GIF', append_images=frames[1:], save_all=True, duration=frameDuration, loop=0)
+    return 'pixsort.gif'
 
 
 
@@ -76,12 +76,12 @@ with gr.Blocks(title="Лучшая работа в мире!") as demo:
                 clength = gr.Slider(2, 100, step=1, value=14, label="char_length", info="Characteristic length for the random width generator. Used in mode `random` and `waves`.")
                 thresholdLower  = gr.Slider(0, 1, step=0.1, value=0.25, label="Threshold (Lower)", info="How dark must a pixel be to be considered as a 'border' for sorting? Used in edges and threshold modes.", visible=False)
                 thresholdUpper  = gr.Slider(0, 1, step=0.1, value=0.80, label="Threshold (Upper)", info="HHow bright must a pixel be to be considered as a 'border' for sorting?", visible=False)
-                interval_image = gr.Image(type="pil",width=200,visible=False)
-                interval_function.change(fn=interval_functionddChange,inputs=[interval_function], outputs=[clength,thresholdLower,thresholdUpper,interval_image])
+                interval_image = gr.Image(type="pil", visible=False)
+                interval_function.change(fn=interval_functionddChange,inputs=[interval_function], outputs=[clength,thresholdLower,thresholdUpper,interval_image])    
             with gr.Group():
-                mask_image = gr.Image(type="pil", value=None, image_mode='L', label="Sorting mask")                
+                mask_image = gr.Image(type="pil", value=None, image_mode='L', label="Sorting mask")             
             with gr.Group():
-                ammountOfFrames = gr.Slider(5, 100, step=1, value=20, label="Amount of frames", info="Amount of GIF frames", interactive=True)
+                ammountOfFrames = gr.Slider(2, 20, step=1, value=5, label="Amount of frames", info="Amount of GIF frames", interactive=True)
                 frameDuration = gr.Slider(20, 500, step=10, value=100, label="Frame duration", info="Frame duration i ms", interactive=True)
 
         with gr.Column(scale=10):
@@ -91,8 +91,8 @@ with gr.Blocks(title="Лучшая работа в мире!") as demo:
             btn = gr.Button("Сделай красиво")
             btn2 = gr.Button("GIF")
            
-            btn.click(fn=pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
-            btn2.click(fn=gifIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameDuration,randomness], outputs=output_img)
+            btn.click(fn=pixsort, inputs=[input_img, mask_image, sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
+            btn2.click(fn=gifIt, inputs=[input_img,mask_image, sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameDuration], outputs=output_img)
             
             
 demo.launch(inbrowser=True, server_port=7860)
