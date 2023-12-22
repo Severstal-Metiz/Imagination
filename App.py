@@ -40,6 +40,7 @@ with gr.Blocks(title="Лучшая работа в мире!") as demo:
             with gr.Group():
                 mask_image = gr.Image(type="pil", value=None, image_mode='L', label="Sorting mask")                
             with gr.Group():
+                gr.Markdown('Настройки для Видео')
                 ammountOfFrames = gr.Slider(5, 100, step=1, value=20, label="Amount of frames", info="Amount of GIF frames", interactive=True)
                 frameRate = gr.Slider(1, 30, step=1, value=12, label="Frame per second", info="FrameRate Фреймкрыса", interactive=True)
 
