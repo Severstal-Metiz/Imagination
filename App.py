@@ -1,16 +1,6 @@
 import gradio as gr
-from pixelsort import pixelsort
-from PIL import Image
-#from multiprocessing import Process
-#from subprocess import Popen, PIPE
-import ffmpeg
-import os
+import Generators as G
 temppath = 'temp/'
-
-
-def pixsort(input_img,mask_image,sorting_function,interval_function, randomness,angle,clength,interval_image):
-    output_img = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength,interval_image=interval_image)
-    return output_img
 
 
 def interval_functionddChange(interval_function):
@@ -28,36 +18,6 @@ def interval_functionddChange(interval_function):
         visInterval_image = True
     print(interval_image)
     return gr.Slider(visible=visclength,interactive=True), gr.Slider(visible=visLower,interactive=True), gr.Slider(visible=visUpper,interactive=True),gr.Image(visible=visInterval_image,interactive=True)
-
-
-
-def gifIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameDuration,randomness):
-    listDir = os.listdir(temppath)
-    for f in listDir:
-        os.remove(temppath + f)
-    frames = [0]*ammountOfFrames
-    #angle = 0
-    ammountOfFrames = ammountOfFrames
-    frameDuration = frameDuration
-    for i in range(ammountOfFrames):
-        new_frame = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
-        frames[i] = new_frame
-        #randomness -= 10
-        #angle +=30
-        
-        new_frame.save(temppath + 'image'+ str(i).rjust(3,'0') + '.PNG')
-    
-    # Save into a GIF file that loops forever
-    (
-        ffmpeg
-        .input("temp/image%03d.PNG", framerate=12)
-        .output("movie.mp4")
-        .run(overwrite_output=True)
-    )
-    #frames[0].save('pixsort.gif', format='GIF', append_images=frames[1:], save_all=True, duration=frameDuration, loop=0)
-    return new_frame #'pixsort.gif'
-
-
 
 
 with gr.Blocks(title="Лучшая работа в мире!") as demo:
@@ -91,8 +51,8 @@ with gr.Blocks(title="Лучшая работа в мире!") as demo:
             btn = gr.Button("Сделай красиво")
             btn2 = gr.Button("GIF")
            
-            btn.click(fn=pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
-            btn2.click(fn=gifIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameDuration,randomness], outputs=output_img)
+            btn.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
+            btn2.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameDuration,randomness], outputs=output_img)
             
             
 demo.launch(inbrowser=True, server_port=7860)
