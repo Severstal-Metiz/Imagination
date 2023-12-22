@@ -1,6 +1,5 @@
 import gradio as gr
 import Generators as G
-temppath = 'temp/'
 
 
 def interval_functionddChange(interval_function):
@@ -42,17 +41,17 @@ with gr.Blocks(title="Лучшая работа в мире!") as demo:
                 mask_image = gr.Image(type="pil", value=None, image_mode='L', label="Sorting mask")                
             with gr.Group():
                 ammountOfFrames = gr.Slider(5, 100, step=1, value=20, label="Amount of frames", info="Amount of GIF frames", interactive=True)
-                frameDuration = gr.Slider(20, 500, step=10, value=100, label="Frame duration", info="Frame duration i ms", interactive=True)
+                frameRate = gr.Slider(1, 30, step=1, value=12, label="Frame per second", info="FrameRate Фреймкрыса", interactive=True)
 
         with gr.Column(scale=10):
             with gr.Row():
                 input_img = gr.Image(type="pil",width=500)
                 output_img = gr.Image(type="pil",width=500)
-            btn = gr.Button("Сделай красиво")
-            btn2 = gr.Button("GIF")
+            btnCreateImage = gr.Button("Сделай красиво")
+            btnCreateVideo = gr.Button("Сделай Видео")
            
-            btn.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
-            btn2.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameDuration,randomness], outputs=output_img)
+            btnCreateImage.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
+            btnCreateVideo.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameRate,randomness], outputs=output_img)
             
             
 demo.launch(inbrowser=True, server_port=7860)

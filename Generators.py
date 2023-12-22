@@ -4,26 +4,23 @@ import ffmpeg
 import os
 temppath = 'temp/'
 
-def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameDuration,randomness):
+def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate,randomness):
     listDir = os.listdir(temppath)
     for f in listDir:
         os.remove(temppath + f)
     frames = [0]*ammountOfFrames
     #angle = 0
-    ammountOfFrames = ammountOfFrames
-    frameDuration = frameDuration
     for i in range(ammountOfFrames):
         new_frame = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
         frames[i] = new_frame
         #randomness -= 10
         #angle +=30
-        
         new_frame.save(temppath + 'image'+ str(i).rjust(3,'0') + '.PNG')
     
     # Save into a GIF file that loops forever
     (
         ffmpeg
-        .input("temp/image%03d.PNG", framerate=12)
+        .input(temppath + "image%03d.PNG", frameRate)
         .output("movie.mp4")
         .run(overwrite_output=True)
     )
