@@ -1,3 +1,3 @@
 call venv\Scripts\activate
-gradio App2.py
+python App.py
 pause
