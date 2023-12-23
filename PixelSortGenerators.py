@@ -4,7 +4,7 @@ import ffmpeg
 import os
 temppath = 'temp/'
 
-def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate,randomness):
+def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate, randomness):
     listDir = os.listdir(temppath)
     for f in listDir:
         os.remove(temppath + f)
@@ -17,11 +17,11 @@ def animateIt(input_img,mask_image,sorting_function,interval_function, angle,cle
         #angle +=30
         new_frame.save(temppath + 'image'+ str(i).rjust(3,'0') + '.PNG')
     
-    # Save into a GIF file that loops forever
+    # r? r блять? Как я до этого должен додуматься блядь
     (
         ffmpeg
-        .input(temppath + "image%03d.PNG", frameRate)
-        .output("movie.mp4")
+        .input(temppath + "image%03d.PNG")
+        .output("movie.mp4", r=frameRate)
         .run(overwrite_output=True)
     )
     #frames[0].save('pixsort.gif', format='GIF', append_images=frames[1:], save_all=True, duration=frameDuration, loop=0)
