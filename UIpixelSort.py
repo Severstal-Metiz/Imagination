@@ -49,6 +49,6 @@ def view():
             btnCreateImage = gr.Button("Сделай красиво")
             btnCreateVideo = gr.Button("Сделай Видео")
            
-            btnCreateImage.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=output_img)
-            btnCreateVideo.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameRate, randomness], outputs=output_img)
+            btnCreateImage.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=[output_img])
+            btnCreateVideo.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameRate, randomness], outputs=[output_img])
             
