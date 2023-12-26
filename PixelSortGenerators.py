@@ -1,33 +1,46 @@
 from pixelsort import pixelsort
-from PIL import Image
-import gradio as gr
 import ffmpeg
 import os
+import time
+import multiprocessing as mp
+
 temppath = 'temp/'
 
-def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate, randomness):
+
+def pixsort(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image, randomness, i):
+    output_img = pixelsort(input_img, mask_image, sorting_function=sorting_function,
+                           interval_function=interval_function, randomness=randomness, angle=angle, clength=clength,
+                           interval_image=interval_image)
+
+    output_img.save(temppath + 'image' + str(i).rjust(3, '0') + '.PNG')
+
+    #return 0
+
+
+def animateIt(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image,
+              ammountOfFrames, frameRate, randomness):
     listDir = os.listdir(temppath)
     for f in listDir:
         os.remove(temppath + f)
-    frames = [0]*ammountOfFrames
-    #angle = 0
+    procs = []
     for i in range(ammountOfFrames):
-        new_frame = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength, interval_image=interval_image)
-        frames[i] = new_frame
-        #randomness -= 10
-        #angle +=30
-        new_frame.save(temppath + 'image'+ str(i).rjust(3,'0') + '.PNG')
-    
+        pr = mp.Process(target=pixsort(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image, randomness, i))
+        pr.daemon = True
+        procs.append(pr)
+        pr.start()
+
+    for proc in procs:
+        proc.terminate()
     # r? r блять? Как я до этого должен додуматься блядь
+    print("HI!")
     (
         ffmpeg
         .input(temppath + "image%03d.PNG")
         .output("movie.mp4", r=frameRate)
         .run(overwrite_output=True)
     )
-    #frames[0].save('pixsort.gif', format='GIF', append_images=frames[1:], save_all=True, duration=frameDuration, loop=0)
-    return new_frame #'pixsort.gif'
 
-def pixsort(input_img,mask_image,sorting_function,interval_function, randomness,angle,clength,interval_image):
-    output_img = pixelsort(input_img,mask_image, sorting_function=sorting_function, interval_function=interval_function, randomness=randomness,angle=angle,clength=clength,interval_image=interval_image)
-    return output_img
+    return "movie.mp4"
+
+
+

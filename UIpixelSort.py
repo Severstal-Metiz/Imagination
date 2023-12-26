@@ -1,5 +1,6 @@
 import gradio as gr
 import PixelSortGenerators as G
+import pixelsort
 
 def interval_functionddChange(interval_function):
     visclength = False
@@ -49,6 +50,6 @@ def view():
             btnCreateImage = gr.Button("Сделай красиво")
             btnCreateVideo = gr.Button("Сделай Видео")
            
-            btnCreateImage.click(fn=G.pixsort, inputs=[input_img,mask_image,sorting_function,interval_function,randomness,angle,clength,interval_image], outputs=[output_img])
+            btnCreateImage.click(fn=pixelsort.pixelsort, inputs=[input_img,mask_image, interval_image, randomness, clength, sorting_function, interval_function, thresholdLower, thresholdUpper, angle,], outputs=[output_img])
             btnCreateVideo.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameRate, randomness], outputs=[output_img])
             
