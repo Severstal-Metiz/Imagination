@@ -5,10 +5,14 @@ import ffmpeg
 import os
 temppath = 'temp/'
 
-def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate, randomness):
+def InitTempDir():
+    os.makedirs(temppath,exist_ok=True)
     listDir = os.listdir(temppath)
     for f in listDir:
         os.remove(temppath + f)
+
+def animateIt(input_img,mask_image,sorting_function,interval_function, angle,clength,interval_image, ammountOfFrames, frameRate, randomness):
+    InitTempDir()
     frames = [0]*ammountOfFrames
     #angle = 0
     for i in range(ammountOfFrames):
