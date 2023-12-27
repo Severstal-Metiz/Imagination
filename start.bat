@@ -1,3 +1,4 @@
 call venv\Scripts\activate
-python App.py
+REM pip install -r requirements.txt
+gradio App.py
 pause
