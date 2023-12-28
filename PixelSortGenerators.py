@@ -2,37 +2,44 @@ from pixelsort import pixelsort
 import ffmpeg
 import os
 import time
+from PIL import Image
+import PIL
+
 import multiprocessing as mp
 
 temppath = 'temp/'
 
+img = Image.open('input.png')
 
-def pixsort(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image, randomness, i):
-    output_img = pixelsort(input_img, mask_image, sorting_function=sorting_function,
+def pixsort(sorting_function, interval_function, angle, clength, interval_image, randomness, i):
+    global img
+
+    output_img = pixelsort(img, sorting_function=sorting_function,
                            interval_function=interval_function, randomness=randomness, angle=angle, clength=clength,
                            interval_image=interval_image)
 
     output_img.save(temppath + 'image' + str(i).rjust(3, '0') + '.PNG')
 
-    #return 0
 
 
-def animateIt(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image,
+def animateIt(input_img, sorting_function, interval_function, angle, clength, interval_image,
               ammountOfFrames, frameRate, randomness):
+
+    input_img.save('input.png')
+
     listDir = os.listdir(temppath)
     for f in listDir:
         os.remove(temppath + f)
     procs = []
     for i in range(ammountOfFrames):
-        pr = mp.Process(target=pixsort(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image, randomness, i))
+        pr = mp.Process(target=pixsort, args=(sorting_function, interval_function, angle, clength, interval_image, randomness, i) )
         pr.daemon = True
         procs.append(pr)
         pr.start()
-
+    pr.join()
     for proc in procs:
         proc.terminate()
     # r? r блять? Как я до этого должен додуматься блядь
-    print("HI!")
     (
         ffmpeg
         .input(temppath + "image%03d.PNG")
@@ -41,6 +48,3 @@ def animateIt(input_img, mask_image, sorting_function, interval_function, angle,
     )
 
     return "movie.mp4"
-
-
-
