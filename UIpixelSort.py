@@ -52,4 +52,4 @@ def view():
            
             btnCreateImage.click(fn=pixelsort.pixelsort, inputs=[input_img,mask_image, interval_image, randomness, clength, sorting_function, interval_function, thresholdLower, thresholdUpper, angle,], outputs=[output_img])
             btnCreateVideo.click(fn=G.animateIt, inputs=[input_img,mask_image,sorting_function,interval_function,angle,clength,interval_image,ammountOfFrames, frameRate, randomness], outputs=[output_img])
-            
+
