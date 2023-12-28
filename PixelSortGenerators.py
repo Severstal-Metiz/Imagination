@@ -9,20 +9,22 @@ import multiprocessing as mp
 
 temppath = 'temp/'
 
-img = Image.open('input.png')
+
+
 
 def pixsort(sorting_function, interval_function, angle, clength, interval_image, randomness, i):
-    global img
+    img = Image.open('input.png')
 
     output_img = pixelsort(img, sorting_function=sorting_function,
                            interval_function=interval_function, randomness=randomness, angle=angle, clength=clength,
                            interval_image=interval_image)
 
     output_img.save(temppath + 'image' + str(i).rjust(3, '0') + '.PNG')
+    print("saved")
 
 
 
-def animateIt(input_img, sorting_function, interval_function, angle, clength, interval_image,
+def animateIt(input_img, mask_image, sorting_function, interval_function, angle, clength, interval_image,
               ammountOfFrames, frameRate, randomness):
 
     input_img.save('input.png')
@@ -33,10 +35,11 @@ def animateIt(input_img, sorting_function, interval_function, angle, clength, in
     procs = []
     for i in range(ammountOfFrames):
         pr = mp.Process(target=pixsort, args=(sorting_function, interval_function, angle, clength, interval_image, randomness, i) )
-        pr.daemon = True
+        #pr.daemon = True
         procs.append(pr)
         pr.start()
-    pr.join()
+    for proc in procs:
+        proc.join()
     for proc in procs:
         proc.terminate()
     # r? r блять? Как я до этого должен додуматься блядь
