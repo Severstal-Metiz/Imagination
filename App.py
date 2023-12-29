@@ -12,4 +12,4 @@ if mp.current_process().name == 'MainProcess':
         with gr.Tab("Kernel"):
             UiKernel.view()
 
-    demo.launch(inbrowser=True, server_port=7860)
+    demo.launch(inbrowser=True)
