@@ -3,7 +3,6 @@ import ffmpeg
 import os
 import time
 from PIL import Image
-import PIL
 import multiprocessing as mp
 
 temppath = 'temp/'
@@ -74,6 +73,6 @@ def make_frames_serial(input_img, mask_image, sorting_function, interval_functio
         frames[i] = new_frame
         new_frame.save(temppath + 'image' + str(i).rjust(3, '0') + '.PNG')
 
-        _make_movie(frameRate)
+    _make_movie(frameRate)
 
     return "movie.mp4"
